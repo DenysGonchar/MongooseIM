@@ -738,7 +738,8 @@ all_modules() ->
      mod_csi,
      mod_disco,
      mod_event_pusher,
-     mod_extdisco
+     mod_extdisco,
+     mod_inbox
     ].
 
 %% path: (host_config[].)modules.*.iqdisc

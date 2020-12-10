@@ -598,21 +598,6 @@ validate([<<"iqdisc">>, <<"mod_private">>, <<"modules">>|_],
 validate([<<"bucket_type">>, <<"riak">>, <<"mod_private">>, <<"modules">>|_],
          [{bucket_type, V}]) ->
     validate_non_empty_binary(V);
-validate([<<"aff_changes">>, <<"mod_inbox">>, <<"modules">>|_],
-         [{aff_changes, V}]) ->
-    validate_boolean(V);
-validate([item, <<"groupchat">>, <<"mod_inbox">>, <<"modules">>|_],
-         [V]) ->
-    validate_groupchat_type(V);
-validate([<<"iqdisc">>, <<"mod_inbox">>, <<"modules">>|_],
-         [{iqdisc, V}]) ->
-    validate_iqdisc(V);
-validate([<<"remove_on_kicked">>, <<"mod_inbox">>, <<"modules">>|_],
-         [{remove_on_kicked, V}]) ->
-    validate_boolean(V);
-validate([item, <<"reset_markers">>, <<"mod_inbox">>, <<"modules">>|_],
-         [V]) ->
-    validate_chat_marker_type(V);
 validate([<<"all_can_configure">>, <<"mod_muc_light">>, <<"modules">>|_],
          [{all_can_configure, V}]) ->
     validate_boolean(V);
@@ -1062,12 +1047,6 @@ validate_ip_access({Access, IPMask}) ->
 
 validate_backend(Mod, Backend) ->
     validate_module(backend_module:backend_module(Mod, Backend)).
-
-validate_chat_marker_type(Type) ->
-    validate_enum(Type, [displayed, received, acknowledged]).
-
-validate_groupchat_type(Type) ->
-    validate_enum(Type, [muc, muclight]).
 
 validate_domain(Domain) when is_list(Domain) ->
     #jid{luser = <<>>, lresource = <<>>} = jid:from_binary(list_to_binary(Domain)),

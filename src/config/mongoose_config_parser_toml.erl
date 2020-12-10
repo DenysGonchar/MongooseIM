@@ -140,16 +140,6 @@ module_opt([<<"redis">>, <<"mod_global_distrib">>|_] = Path, V) ->
     [{redis, Redis}];
 module_opt([<<"hosts_refresh_interval">>, <<"mod_global_distrib">>|_], V) ->
     [{hosts_refresh_interval, V}];
-module_opt([<<"proxy_host">>, <<"mod_jingle_sip">>|_], V) ->
-    [{proxy_host, b2l(V)}];
-module_opt([<<"proxy_port">>, <<"mod_jingle_sip">>|_], V) ->
-    [{proxy_port, V}];
-module_opt([<<"listen_port">>, <<"mod_jingle_sip">>|_], V) ->
-    [{listen_port, V}];
-module_opt([<<"local_host">>, <<"mod_jingle_sip">>|_], V) ->
-    [{local_host, b2l(V)}];
-module_opt([<<"sdp_origin">>, <<"mod_jingle_sip">>|_], V) ->
-    [{sdp_origin, b2l(V)}];
 module_opt([<<"ram_key_size">>, <<"mod_keystore">>|_], V) ->
     [{ram_key_size, V}];
 module_opt([<<"keys">>, <<"mod_keystore">>|_] = Path, V) ->
@@ -985,7 +975,8 @@ node_to_string(Node) -> [binary_to_list(Node)].
         Mod =/= <<"mod_disco">>,
         Mod =/= <<"mod_event_pusher">>,
         Mod =/= <<"mod_extdisco">>,
-        Mod =/= <<"mod_inbox">>). % TODO temporary, remove with 'handler/1'
+        Mod =/= <<"mod_inbox">>,
+        Mod =/= <<"mod_jingle_sip">>). % TODO temporary, remove with 'handler/1'
 
 -spec handler(path()) ->
           fun((path(), toml_value()) -> option()) | mongoose_config_spec:config_node().

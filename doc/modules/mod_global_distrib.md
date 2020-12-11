@@ -146,8 +146,8 @@ A list of endpoints on which the server will listen for connections.
 The endpoint list will be shared with other datacenters via the replicated backend.
 
 #### `modules.mod_global_distrib.connections.advertised_endpoints`
-* **Syntax:** Array of TOML tables with the following keys: `host` and `port`, and the following values: {host = `string`, port = `non_negative_integer`} **or** `false`
-* **Default:** `false`
+* **Syntax:** Array of TOML tables with the following keys: `host` and `port`, and the following values: {host = `string`, port = `non_negative_integer`}
+* **Default:** not set
 * **Example:** `advertised_endpoints = [{host = "172.16.0.2", port = 5555}]`
 
 A list of endpoints which will be advertised in Redis and therefore used to establish connection with this node by other nodes. If not specified, `endpoints` value (after resolution) is considered `advertised_endpoints`. The host may be either IP or domain, just like in case of endpoints. The difference is, the domain name won't be resolved but inserted directly to the mappings backend instead.

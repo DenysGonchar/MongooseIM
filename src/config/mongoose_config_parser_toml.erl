@@ -120,26 +120,6 @@ module_opt([<<"max_file_size">>, <<"mod_http_upload">>|_], V) ->
 module_opt([<<"s3">>, <<"mod_http_upload">>|_] = Path, V) ->
     S3Opts = parse_section(Path, V),
     [{s3, S3Opts}];
-module_opt([<<"global_host">>, <<"mod_global_distrib">>|_], V) ->
-    [{global_host, b2l(V)}];
-module_opt([<<"local_host">>, <<"mod_global_distrib">>|_], V) ->
-    [{local_host, b2l(V)}];
-module_opt([<<"message_ttl">>, <<"mod_global_distrib">>|_], V) ->
-    [{message_ttl, V}];
-module_opt([<<"connections">>, <<"mod_global_distrib">>|_] = Path, V) ->
-    Conns = parse_section(Path, V),
-    [{connections, Conns}];
-module_opt([<<"cache">>, <<"mod_global_distrib">>|_] = Path, V) ->
-    Cache = parse_section(Path, V),
-    [{cache, Cache}];
-module_opt([<<"bounce">>, <<"mod_global_distrib">>|_] = Path, V) ->
-    Bounce = parse_section(Path, V, fun format_global_distrib_bounce/1),
-    [{bounce, Bounce}];
-module_opt([<<"redis">>, <<"mod_global_distrib">>|_] = Path, V) ->
-    Redis = parse_section(Path, V),
-    [{redis, Redis}];
-module_opt([<<"hosts_refresh_interval">>, <<"mod_global_distrib">>|_], V) ->
-    [{hosts_refresh_interval, V}];
 module_opt([<<"pm">>, <<"mod_mam_meta">>|_] = Path, V) ->
     PM = parse_section(Path, V),
     [{pm, PM}];
@@ -427,75 +407,6 @@ mod_http_upload_s3([<<"access_key_id">>|_], V) ->
 mod_http_upload_s3([<<"secret_access_key">>|_], V) ->
     [{secret_access_key, b2l(V)}].
 
--spec mod_global_distrib_connections(path(), toml_value()) -> [option()].
-mod_global_distrib_connections([<<"endpoints">>|_] = Path, V) ->
-    Endpoints = parse_list(Path, V),
-    [{endpoints, Endpoints}];
-mod_global_distrib_connections([<<"advertised_endpoints">>|_], false) ->
-    [{advertised_endpoints, false}];
-mod_global_distrib_connections([<<"advertised_endpoints">>|_] = Path, V) ->
-    Endpoints = parse_list(Path, V),
-    [{advertised_endpoints, Endpoints}];
-mod_global_distrib_connections([<<"connections_per_endpoint">>|_], V) ->
-    [{connections_per_endpoint, V}];
-mod_global_distrib_connections([<<"endpoint_refresh_interval">>|_], V) ->
-    [{endpoint_refresh_interval, V}];
-mod_global_distrib_connections([<<"endpoint_refresh_interval_when_empty">>|_], V) ->
-    [{endpoint_refresh_interval_when_empty, V}];
-mod_global_distrib_connections([<<"disabled_gc_interval">>|_], V) ->
-    [{disabled_gc_interval, V}];
-mod_global_distrib_connections([<<"tls">>|_] = Path, V) ->
-    TLSOpts = parse_section(Path, V, fun format_global_distrib_tls/1),
-    [{tls_opts, TLSOpts}].
-
--spec format_global_distrib_tls([option()]) -> option().
-format_global_distrib_tls(Opts) ->
-    case proplists:lookup(enabled, Opts) of
-        {enabled, true} -> proplists:delete(enabled, Opts);
-        _ -> false
-    end.
-
--spec mod_global_distrib_cache(path(), toml_value()) -> [option()].
-mod_global_distrib_cache([<<"cache_missed">>|_], V) ->
-    [{cache_missed, V}];
-mod_global_distrib_cache([<<"domain_lifetime_seconds">>|_], V) ->
-    [{domain_lifetime_seconds, V}];
-mod_global_distrib_cache([<<"jid_lifetime_seconds">>|_], V) ->
-    [{jid_lifetime_seconds, V}];
-mod_global_distrib_cache([<<"max_jids">>|_], V) ->
-    [{max_jids, V}].
-
--spec mod_global_distrib_redis(path(), toml_value()) -> [option()].
-mod_global_distrib_redis([<<"pool">>|_], V) ->
-    [{pool, b2a(V)}];
-mod_global_distrib_redis([<<"expire_after">>|_], V) ->
-    [{expire_after, V}];
-mod_global_distrib_redis([<<"refresh_after">>|_], V) ->
-    [{refresh_after, V}].
-
--spec mod_global_distrib_bounce(path(), toml_value()) -> [option()].
-mod_global_distrib_bounce([<<"resend_after_ms">>|_], V) ->
-    [{resend_after_ms, V}];
-mod_global_distrib_bounce([<<"max_retries">>|_], V) ->
-    [{max_retries, V}];
-mod_global_distrib_bounce([<<"enabled">>|_], V) ->
-    [{enabled, V}].
-
--spec format_global_distrib_bounce([option()]) -> option().
-format_global_distrib_bounce(Opts) ->
-    case proplists:lookup(enabled, Opts) of
-        {enabled, false} -> false;
-        _ -> proplists:delete(enabled, Opts)
-    end.
-
--spec mod_global_distrib_connections_endpoints(path(), toml_section()) -> [option()].
-mod_global_distrib_connections_endpoints(_, #{<<"host">> := Host, <<"port">> := Port}) ->
-    [{b2l(Host), Port}].
-
--spec mod_global_distrib_connections_advertised_endpoints(path(), toml_section()) -> [option()].
-mod_global_distrib_connections_advertised_endpoints(_, #{<<"host">> := Host, <<"port">> := Port}) ->
-    [{b2l(Host), Port}].
-
 -spec mod_mam_opts(path(), toml_value()) -> [option()].
 mod_mam_opts([<<"backend">>|_], V) ->
     [{backend, b2a(V)}];
@@ -715,18 +626,6 @@ welcome_message([<<"body">>|_], Value) ->
 process_host_item(Path, M) ->
     {_Host, Sections} = maps:take(<<"host">>, M),
     parse_section(Path, Sections).
-
-%% path: (host_config[].)modules.mod_global_distrib.connections.tls.*
--spec fast_tls_option(path(), toml_value()) -> [option()].
-fast_tls_option([<<"certfile">>|_], V) -> [{certfile, b2l(V)}];
-fast_tls_option([<<"cacertfile">>|_], V) -> [{cafile, b2l(V)}];
-fast_tls_option([<<"dhfile">>|_], V) -> [{dhfile, b2l(V)}];
-fast_tls_option([<<"ciphers">>|_], V) -> [{ciphers, b2l(V)}].
-
-mod_global_distrib_tls_option([<<"enabled">>|_], V) ->
-    [{enabled, V}];
-mod_global_distrib_tls_option(P, V) ->
-    fast_tls_option(P, V).
 
 set_overrides(Overrides, State) ->
     lists:foldl(fun({override, Scope}, CurrentState) ->
@@ -964,6 +863,7 @@ node_to_string(Node) -> [binary_to_list(Node)].
         Mod =/= <<"mod_disco">>,
         Mod =/= <<"mod_event_pusher">>,
         Mod =/= <<"mod_extdisco">>,
+        Mod =/= <<"mod_global_distrib">>,
         Mod =/= <<"mod_inbox">>,
         Mod =/= <<"mod_jingle_sip">>,
         Mod =/= <<"mod_keystore">>). % TODO temporary, remove with 'handler/1'
@@ -986,20 +886,6 @@ handler([_, <<"welcome_message">>, <<"mod_register">>, <<"modules">>]) ->
     fun welcome_message/2;
 handler([_, <<"s3">>, <<"mod_http_upload">>, <<"modules">>]) ->
     fun mod_http_upload_s3/2;
-handler([_, <<"connections">>, <<"mod_global_distrib">>, <<"modules">>]) ->
-    fun mod_global_distrib_connections/2;
-handler([_, <<"cache">>, <<"mod_global_distrib">>, <<"modules">>]) ->
-    fun mod_global_distrib_cache/2;
-handler([_, <<"bounce">>, <<"mod_global_distrib">>, <<"modules">>]) ->
-    fun mod_global_distrib_bounce/2;
-handler([_, <<"redis">>, <<"mod_global_distrib">>, <<"modules">>]) ->
-    fun mod_global_distrib_redis/2;
-handler([_,<<"endpoints">>, <<"connections">>, <<"mod_global_distrib">>, <<"modules">>]) ->
-    fun mod_global_distrib_connections_endpoints/2;
-handler([_,<<"advertised_endpoints">>, <<"connections">>, <<"mod_global_distrib">>, <<"modules">>]) ->
-    fun mod_global_distrib_connections_advertised_endpoints/2;
-handler([_,<<"tls">>, <<"connections">>, <<"mod_global_distrib">>, <<"modules">>]) ->
-    fun mod_global_distrib_tls_option/2;
 handler([_, _, <<"mod_mam_meta">>, <<"modules">>]) ->
     fun mod_mam_opts/2;
 handler([_, <<"default_room">>, <<"mod_muc">>, <<"modules">>]) ->

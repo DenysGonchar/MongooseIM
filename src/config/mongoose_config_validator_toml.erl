@@ -517,12 +517,6 @@ validate([<<"store_current_id">>, <<"mod_roster">>, <<"modules">>|_],
 validate([<<"versioning">>, <<"mod_roster">>, <<"modules">>|_],
          [{versioning, V}]) ->
     validate_boolean(V);
-validate([item, <<"keys">>, <<"mod_keystore">>, <<"modules">>|_],
-         [V]) ->
-    validate_keystore_key(V);
-validate([<<"ram_key_size">>, <<"mod_keystore">>, <<"modules">>|_],
-         [{ram_key_size, V}]) ->
-    validate_non_negative_integer(V);
 validate([<<"backend">>, <<"mod_vcard">>, <<"modules">>|_],
          [{backend, V}]) ->
     validate_backend(mod_vcard, V);
@@ -937,6 +931,7 @@ validate(V, string, url) -> validate_url(V);
 validate(V, string, domain_template) -> validate_domain_template(V);
 validate(V, string, ip_address) -> validate_ip_address(V);
 validate(V, string, network_address) -> validate_network_address(V);
+validate(V, string, filename) -> validate_filename(V);
 validate(V, string, non_empty) -> validate_non_empty_string(V);
 validate(V, atom, module) -> validate_module(V);
 validate(V, atom, {module, Prefix}) ->
@@ -1131,12 +1126,6 @@ validate_dirname(Dirname) ->
         Reason ->
             error(#{what => invalid_dirname, dirname => Dirname, reason => Reason})
     end.
-
-validate_keystore_key({Name, ram}) ->
-    validate_non_empty_atom(Name);
-validate_keystore_key({Name, {file, Path}}) ->
-    validate_non_empty_atom(Name),
-    validate_filename(Path).
 
 validate_muc_affiliation_rule({{User, Server, Resource}, Affiliation}) ->
     validate_non_empty_binary(User),

@@ -140,11 +140,6 @@ module_opt([<<"redis">>, <<"mod_global_distrib">>|_] = Path, V) ->
     [{redis, Redis}];
 module_opt([<<"hosts_refresh_interval">>, <<"mod_global_distrib">>|_], V) ->
     [{hosts_refresh_interval, V}];
-module_opt([<<"ram_key_size">>, <<"mod_keystore">>|_], V) ->
-    [{ram_key_size, V}];
-module_opt([<<"keys">>, <<"mod_keystore">>|_] = Path, V) ->
-    Keys = parse_list(Path, V),
-    [{keys, Keys}];
 module_opt([<<"pm">>, <<"mod_mam_meta">>|_] = Path, V) ->
     PM = parse_section(Path, V),
     [{pm, PM}];
@@ -500,12 +495,6 @@ mod_global_distrib_connections_endpoints(_, #{<<"host">> := Host, <<"port">> := 
 -spec mod_global_distrib_connections_advertised_endpoints(path(), toml_section()) -> [option()].
 mod_global_distrib_connections_advertised_endpoints(_, #{<<"host">> := Host, <<"port">> := Port}) ->
     [{b2l(Host), Port}].
-
--spec mod_keystore_keys(path(), toml_section()) -> [option()].
-mod_keystore_keys(_, #{<<"name">> := Name, <<"type">> := <<"ram">>}) ->
-    [{b2a(Name), ram}];
-mod_keystore_keys(_, #{<<"name">> := Name, <<"type">> := <<"file">>, <<"path">> := Path}) ->
-    [{b2a(Name), {file, b2l(Path)}}].
 
 -spec mod_mam_opts(path(), toml_value()) -> [option()].
 mod_mam_opts([<<"backend">>|_], V) ->
@@ -976,7 +965,8 @@ node_to_string(Node) -> [binary_to_list(Node)].
         Mod =/= <<"mod_event_pusher">>,
         Mod =/= <<"mod_extdisco">>,
         Mod =/= <<"mod_inbox">>,
-        Mod =/= <<"mod_jingle_sip">>). % TODO temporary, remove with 'handler/1'
+        Mod =/= <<"mod_jingle_sip">>,
+        Mod =/= <<"mod_keystore">>). % TODO temporary, remove with 'handler/1'
 
 -spec handler(path()) ->
           fun((path(), toml_value()) -> option()) | mongoose_config_spec:config_node().
@@ -1010,8 +1000,6 @@ handler([_,<<"advertised_endpoints">>, <<"connections">>, <<"mod_global_distrib"
     fun mod_global_distrib_connections_advertised_endpoints/2;
 handler([_,<<"tls">>, <<"connections">>, <<"mod_global_distrib">>, <<"modules">>]) ->
     fun mod_global_distrib_tls_option/2;
-handler([_, <<"keys">>, <<"mod_keystore">>, <<"modules">>]) ->
-    fun mod_keystore_keys/2;
 handler([_, _, <<"mod_mam_meta">>, <<"modules">>]) ->
     fun mod_mam_opts/2;
 handler([_, <<"default_room">>, <<"mod_muc">>, <<"modules">>]) ->

@@ -740,7 +740,8 @@ all_modules() ->
      mod_event_pusher,
      mod_extdisco,
      mod_inbox,
-     mod_jingle_sip
+     mod_jingle_sip,
+     mod_keystore
     ].
 
 %% path: (host_config[].)modules.*.iqdisc

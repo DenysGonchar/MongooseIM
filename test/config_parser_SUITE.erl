@@ -1756,9 +1756,7 @@ mod_http_upload(_Config) ->
              {token_bytes, 32}],
     ?eqf(modopts(mod_http_upload, MBase), T(Base)),
     ?errf(T(Base#{<<"host">> => -1})),
-    ?errf(T(Base#{<<"host">> => <<" f g ">>})),
     ?errf(T(Base#{<<"backend">> => <<"dev_null_as_a_service">>})),
-    ?errf(T(Base#{<<"expiration_time">> => <<>>})),
     ?errf(T(Base#{<<"expiration_time">> => -1})),
     ?errf(T(Base#{<<"token_bytes">> => -1})),
     ?errf(T(Base#{<<"max_file_size">> => -1})),
@@ -1767,6 +1765,7 @@ mod_http_upload(_Config) ->
     ?errf(T(Base#{<<"s3">> => S3#{<<"bucket_url">> => -1}})),
     ?errf(T(Base#{<<"s3">> => S3#{<<"region">> => -1}})),
     ?errf(T(Base#{<<"s3">> => S3#{<<"secret_access_key">> => -1}})),
+    ?errf(T(Base#{<<"s3">> => maps:remove(<<"bucket_url">>, S3)})),
     check_iqdisc(mod_http_upload).
 
 mod_jingle_sip(_Config) ->
